@@ -46,6 +46,22 @@ export async function getResults(quizId) {
     return data;
 }
 
+export async function getResult(quizId, score) {
+    const {data, error} = await supabase.from('Result').select('*').eq('quiz', quizId).order('value', { ascending: false });
+    if (error) {
+        console.error('Error fetching results', error);
+        return null;
+    }
+
+    for (let result of data) {
+        if (score >= result.value) {
+            return result;
+        }
+    }
+
+    return null;
+}
+
 export default function QuizData() {
     return (
         <Text>Error</Text>

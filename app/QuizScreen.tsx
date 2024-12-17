@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { useRoute } from '@react-navigation/native';
+import { StyleSheet, Text, View, ScrollView, Button } from 'react-native';
+import { useRoute, useNavigation, NavigationProp } from '@react-navigation/native';
 import { getQuizById, getQuestionsByQuizId, getOptions } from '@/app/utils/QuizData';
 import QuizQuestion from '@/components/QuizQuestion';
 
@@ -26,8 +26,19 @@ interface Question {
     options: Option[];
 }
 
+interface QuizResult {
+    quiz: string;
+    score: number;
+}
+
+type RootStackParamList = {
+    QuizScreen: { id: string };
+    ResultScreen: QuizResult;
+};
+
 export default function QuizScreen() {
     const route = useRoute();
+    const navigation = useNavigation<NavigationProp<RootStackParamList>>();
     const { id } = route.params as { id: string };
     const [quiz, setQuiz] = useState<Quiz | null>(null);
     const [questions, setQuestions] = useState<Question[]>([]);
@@ -74,6 +85,13 @@ export default function QuizScreen() {
         });
     };
 
+    const handleSubmit = () => {
+        if (quiz) {
+            const result: QuizResult = { quiz: JSON.stringify(quiz), score };
+            navigation.navigate('ResultScreen', result);
+        }
+    };
+
     if (!quiz) {
         return (
             <View style={styles.container}>
@@ -83,7 +101,7 @@ export default function QuizScreen() {
     }
 
     return (
-        <View style={styles.container}>
+        <ScrollView contentContainerStyle={styles.container}>
             <Text style={styles.title}>{quiz.title}</Text>
             <Text style={styles.description}>{quiz.description}</Text>
             {questions.map((question) => (
@@ -94,13 +112,14 @@ export default function QuizScreen() {
                     onOptionPress={handleOptionPress}
                 />
             ))}
-        </View>
+            <Button title="Submit" onPress={handleSubmit} />
+        </ScrollView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        flexGrow: 1,
         padding: 20,
         justifyContent: 'center',
     },
