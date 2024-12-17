@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import { getQuizById, getQuestionsByQuizId, getOptions } from '@/app/utils/QuizData';
+import QuizQuestion from '@/components/QuizQuestion';
 
 interface Quiz {
     image: string | null;
@@ -10,15 +11,19 @@ interface Quiz {
     description: string;
 }
 
-interface Question {
-    id: string;
-    text: string;
-}
-
 interface Option {
-    id: string;
+    id: number;
     option_text: string;
     weight: number;
+    question: number;
+}
+
+interface Question {
+    id: number;
+    quiz: string;
+    text: string;
+    question: string;
+    options: Option[];
 }
 
 export default function QuizScreen() {
@@ -26,7 +31,8 @@ export default function QuizScreen() {
     const { id } = route.params as { id: string };
     const [quiz, setQuiz] = useState<Quiz | null>(null);
     const [questions, setQuestions] = useState<Question[]>([]);
-    const [options, setOptions] = useState<{ [key: string]: Option[] }>({});
+    const [selectedOptions, setSelectedOptions] = useState<{ [key: number]: Option }>({});
+    const [score, setScore] = useState<number>(0);
 
     useEffect(() => {
         const fetchQuizData = async () => {
@@ -35,13 +41,13 @@ export default function QuizScreen() {
                 setQuiz(quizData);
 
                 const questionsData = await getQuestionsByQuizId(id);
-                setQuestions(questionsData);
-
-                const optionsData: { [key: string]: Option[] } = {};
-                for (const question of questionsData) {
-                    optionsData[question.id] = await getOptions(id, question.id);
-                }
-                setOptions(optionsData);
+                const questionsWithOptions = await Promise.all(
+                    questionsData.map(async (question) => {
+                        const options = await getOptions(question.id);
+                        return { ...question, options };
+                    })
+                );
+                setQuestions(questionsWithOptions);
             } catch (error) {
                 console.error(error);
             }
@@ -49,6 +55,24 @@ export default function QuizScreen() {
 
         fetchQuizData();
     }, [id]);
+
+    const handleOptionPress = (question: Question, option: Option) => {
+        setSelectedOptions((prevSelectedOptions) => {
+            const newSelectedOptions = {
+                ...prevSelectedOptions,
+                [question.id]: option,
+            };
+
+            let total = 0;
+            for (let o of Object.values(newSelectedOptions)) {
+                total += o.weight;
+            }
+            setScore(total);
+            console.log('Score:', total);
+
+            return newSelectedOptions;
+        });
+    };
 
     if (!quiz) {
         return (
@@ -63,12 +87,12 @@ export default function QuizScreen() {
             <Text style={styles.title}>{quiz.title}</Text>
             <Text style={styles.description}>{quiz.description}</Text>
             {questions.map((question) => (
-                <View key={question.id} style={styles.questionContainer}>
-                    <Text style={styles.questionText}>{question.text}</Text>
-                    {options[question.id]?.map((option) => (
-                        <Text key={option.id} style={styles.optionText}>{option.option_text}</Text>
-                    ))}
-                </View>
+                <QuizQuestion
+                    key={question.id}
+                    question={question}
+                    selectedOptionId={selectedOptions[question.id]?.id || null}
+                    onOptionPress={handleOptionPress}
+                />
             ))}
         </View>
     );
@@ -95,16 +119,5 @@ const styles = StyleSheet.create({
         fontSize: 18,
         color: 'red',
         textAlign: 'center',
-    },
-    questionContainer: {
-        marginTop: 20,
-    },
-    questionText: {
-        fontSize: 20,
-        fontWeight: 'bold',
-    },
-    optionText: {
-        fontSize: 16,
-        marginLeft: 10,
     },
 });
