@@ -1,4 +1,4 @@
-import {StyleSheet, View} from 'react-native';
+import {StyleSheet, View, ScrollView} from 'react-native';
 import React from "react";
 import {getAllQuizzes} from "@/app/utils/QuizData";
 import QuizListItem from "@/components/QuizListItem";
@@ -28,15 +28,20 @@ export default function HomeScreen() {
     }, []);
 
     return (
-        <View style={{flex: 1, alignItems: 'center'}}>
+        <ScrollView contentContainerStyle={styles.container}>
             {quizList.map((quiz) => (
                 <QuizListItem key={quiz.id} quiz={quiz}/>
             ))}
-        </View>
+        </ScrollView>
     );
 }
 
 const styles = StyleSheet.create({
+    container: {
+        flexGrow: 1,
+        alignItems: 'center',
+        padding: 20,
+    },
     titleContainer: {
         flexDirection: 'row',
         alignItems: 'center',

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { useRoute, RouteProp } from '@react-navigation/native';
+import { StyleSheet, Text, View, Image, Button } from 'react-native';
+import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
 import { ParamListBase } from '@react-navigation/native';
 import { getResult } from '@/app/utils/QuizData';
 
@@ -30,6 +30,7 @@ type ResultScreenRouteProp = RouteProp<RootStackParamList, 'ResultScreen'>;
 
 export default function ResultScreen() {
     const route = useRoute<ResultScreenRouteProp>();
+    const navigation = useNavigation();
     const { quiz, score } = route.params;
     const [result, setResult] = useState<Result | null>(null);
 
@@ -50,15 +51,19 @@ export default function ResultScreen() {
 
     return (
         <View style={styles.container}>
+            {parsedQuiz.image && <Image source={{ uri: parsedQuiz.image }} style={styles.image} />}
             <Text style={styles.title}>{parsedQuiz.title}</Text>
             <Text style={styles.description}>{parsedQuiz.description}</Text>
             <Text style={styles.score}>Your Score: {score}</Text>
             {result && (
-                <>
-                    <Text style={styles.title}>{result.name}</Text>
-                    <Text style={styles.description}>{result.description}</Text>
-                </>
+                <View style={styles.resultContainer}>
+                    <Text style={styles.resultTitle}>{result.name}</Text>
+                    <Text style={styles.resultDescription}>{result.description}</Text>
+                </View>
             )}
+            {/* I know using @ts-ignore is a sin. I am sorry... ~Dan */}
+            {/* @ts-ignore */}
+            <Button title="Return to Home" onPress={() => navigation.navigate('(tabs)')} />
         </View>
     );
 }
@@ -69,21 +74,54 @@ const styles = StyleSheet.create({
         padding: 20,
         justifyContent: 'center',
         alignItems: 'center',
+        backgroundColor: '#f5f5f5',
+    },
+    image: {
+        width: 200,
+        height: 200,
+        marginBottom: 20,
+        borderRadius: 100,
     },
     title: {
-        fontSize: 24,
+        fontSize: 28,
         fontWeight: 'bold',
-        marginBottom: 20,
+        marginBottom: 10,
         textAlign: 'center',
+        color: '#333',
     },
     description: {
         fontSize: 18,
         marginBottom: 20,
         textAlign: 'center',
+        color: '#666',
     },
     score: {
         fontSize: 22,
         fontWeight: 'bold',
-        color: 'green',
+        color: '#4caf50',
+        marginBottom: 20,
+    },
+    resultContainer: {
+        marginTop: 20,
+        padding: 20,
+        backgroundColor: '#fff',
+        borderRadius: 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 5,
+        elevation: 5,
+        alignItems: 'center',
+    },
+    resultTitle: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginBottom: 10,
+        color: '#333',
+    },
+    resultDescription: {
+        fontSize: 18,
+        textAlign: 'center',
+        color: '#666',
     },
 });
