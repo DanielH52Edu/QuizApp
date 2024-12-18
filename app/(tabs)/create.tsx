@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button, TextInput, View, Text, StyleSheet, ScrollView, Image } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { submitQuizData } from '@/app/utils/QuizData';
+import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
 
 export default function CreateScreen() {
     const [title, setTitle] = useState('');
@@ -9,6 +10,8 @@ export default function CreateScreen() {
     const [questions, setQuestions] = useState([{ question: '', options: [{ text: '', weight: 0 }] }]);
     const [results, setResults] = useState([{ name: '', description: '', value: 0 }]);
     const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
+
+    const navigation = useNavigation();
 
     const addQuestion = () => {
         setQuestions([...questions, { question: '', options: [{ text: '', weight: 0 }] }]);
@@ -55,6 +58,8 @@ export default function CreateScreen() {
     const handleSubmit = () => {
         const quizData = { title, description, questions, results, backgroundImage };
         submitQuizData(quizData);
+        //Alert that the Submit was done Successfully
+        //Send user to HomeScreen - navigation.navigate('(tabs)') somehow?
     };
 
     const handleFileChange = () => {
@@ -65,6 +70,7 @@ export default function CreateScreen() {
                 console.log('ImagePicker Error: ', response.errorMessage);
             } else if (response.assets && response.assets.length > 0 && response.assets[0].uri) {
                 setBackgroundImage(response.assets[0].uri);
+                //Alert Success
             }
         });
     };

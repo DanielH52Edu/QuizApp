@@ -31,7 +31,13 @@ interface RootStackParamList extends ParamListBase {
 export default function SavedScreen() {
     return (
         <View>
+<<<<<<< Updated upstream
             <Text style = {styles.title}>Saved Results</Text>
+=======
+            <Text>Saved</Text>
+            {/* Show a list of results using .map just like in the index */}
+            {/* gonna need ResultListItem i think to display properly in the way that you do */}
+>>>>>>> Stashed changes
         </View>
     );
 
