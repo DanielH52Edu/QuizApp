@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, Image } from 'react-native';
+import { StyleSheet, Text, View, ScrollView } from 'react-native';
 import ResultListItem from "@/components/ResultListItem";
 
 interface SavedResult {
@@ -14,16 +14,8 @@ interface SavedResult {
     };
 }
 
-interface Quiz {
-    image: string | null;
-    id: string;
-    title: string;
-    description: string;
-}
-
 export default function SavedScreen() {
     const [savedResults, setSavedResults] = useState<SavedResult[]>([]);
-
 
     useEffect(() => {
         const fetchSavedResults = async () => {
@@ -43,11 +35,13 @@ export default function SavedScreen() {
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Saved Results</Text>
-            {savedResults.map((savedResult, index) => (
-                <View key={index} style={styles.resultContainer}>
-                    <ResultListItem result={savedResult} />
-                </View>
-            ))}
+            <ScrollView contentContainerStyle={styles.scrollViewContent}>
+                {savedResults.map((savedResult, index) => (
+                    <View key={index} style={styles.resultContainer}>
+                        <ResultListItem result={savedResult} />
+                    </View>
+                ))}
+            </ScrollView>
         </View>
     );
 }
@@ -64,6 +58,9 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         textAlign: 'center',
     },
+    scrollViewContent: {
+        paddingBottom: 20,
+    },
     resultContainer: {
         marginBottom: 20,
         padding: 15,
@@ -71,18 +68,5 @@ const styles = StyleSheet.create({
         borderColor: '#ddd',
         borderRadius: 5,
         backgroundColor: '#fff',
-    },
-    resultTitle: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 10,
-    },
-    resultDescription: {
-        fontSize: 18,
-        marginBottom: 10,
-    },
-    resultValue: {
-        fontSize: 18,
-        fontWeight: 'bold',
     },
 });
