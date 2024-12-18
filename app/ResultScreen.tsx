@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, Image, Button } from 'react-native';
 import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
@@ -41,6 +42,7 @@ export default function ResultScreen() {
             try {
                 const r = await getResult(parsedQuiz.id, score);
                 setResult(r);
+                await saveResult(parsedQuiz.id, r);
             } catch (error) {
                 console.error(error);
             }
@@ -48,6 +50,17 @@ export default function ResultScreen() {
 
         fetchResult();
     }, [parsedQuiz.id, score]);
+
+    const saveResult = async (quizId: string, result: Result) => {
+        try {
+            const savedResults = await AsyncStorage.getItem('savedResults');
+            const results = savedResults ? JSON.parse(savedResults) : [];
+            results.push({ quizId, result });
+            await AsyncStorage.setItem('savedResults', JSON.stringify(results));
+        } catch (error) {
+            console.error('Error saving result:', error);
+        }
+    };
 
     return (
         <View style={styles.container}>
